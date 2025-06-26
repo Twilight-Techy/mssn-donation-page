@@ -1,0 +1,71 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum PaymentMethod {
+  paystack
+  opay
+  flutterwave
+}
+
+enum DonationStatus {
+  pending
+  completed
+  failed
+}
+
+model Campaign {
+  id          String     @id @default(uuid())
+  title       String
+  description String
+  imageSrc    String
+  goal        Float
+  raised      Float       @default(0)
+  startDate   DateTime
+  endDate     DateTime
+  isActive    Boolean     @default(true)
+  isFeatured  Boolean     @default(false)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  donations   Donation[]
+}
+
+model Donation {
+  id            String          @id @default(uuid())
+  reference     String          @unique
+  name          String
+  email         String
+  phone         String?
+  message       String?
+  amount        Float
+  paymentMethod PaymentMethod
+  status        DonationStatus
+  isAnonymous   Boolean         @default(false)
+  isSubscribed  Boolean         @default(false)
+  createdAt     DateTime        @default(now())
+
+  campaignId    String
+  campaign      Campaign        @relation(fields: [campaignId], references: [id])
+}
+
+model Subscriber {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  createdAt DateTime @default(now())
+}
+
+model AdminUser {
+  id           String   @id @default(uuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}

@@ -13,130 +13,77 @@ import SmoothScroll from "@/components/smooth-scroll"
 import { differenceInDays } from "date-fns"
 import { ChurchIcon as Mosque, Book, GraduationCap, Users, Heart, Calendar, ChevronRight } from "lucide-react"
 
-// Mock data for preview
-const mockCampaigns = {
-  activeCampaigns: [
-    {
-      id: "camp1",
-      title: "Magazine Launch",
-      description: "Help us launch our first Islamic magazine to spread knowledge and inspire our community.",
-      imageSrc: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?q=80&w=1000&auto=format&fit=crop",
-      goal: 500000,
-      raised: 325000,
-      startDate: new Date(),
-      endDate: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30),
-      isActive: true,
-      isFeatured: true,
-    },
-    {
-      id: "camp2",
-      title: "Ramadan Food Drive",
-      description: "Provide iftar meals for students and community members during Ramadan.",
-      imageSrc: "https://images.unsplash.com/photo-1532375810709-75b1da00537c?q=80&w=1000&auto=format&fit=crop",
-      goal: 300000,
-      raised: 120000,
-      startDate: new Date(),
-      endDate: new Date(Date.now() + 1000 * 60 * 60 * 24 * 45),
-      isActive: true,
-      isFeatured: false,
-    },
-    {
-      id: "camp3",
-      title: "Islamic Library",
-      description: "Help us expand our collection of Islamic books and resources for students.",
-      imageSrc: "https://images.unsplash.com/photo-1507842217343-583bb7270b66?q=80&w=1000&auto=format&fit=crop",
-      goal: 300000,
-      raised: 75000,
-      startDate: new Date(),
-      endDate: new Date(Date.now() + 1000 * 60 * 60 * 24 * 60),
-      isActive: true,
-      isFeatured: false,
-    },
-  ],
-  upcomingCampaigns: [
-    {
-      id: "camp4",
-      title: "Annual Islamic Conference",
-      description: "Support our upcoming annual conference featuring renowned Islamic scholars.",
-      imageSrc: "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?q=80&w=1000&auto=format&fit=crop",
-      goal: 750000,
-      raised: 0,
-      startDate: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30),
-      endDate: new Date(Date.now() + 1000 * 60 * 60 * 24 * 90),
-      isActive: false,
-      isFeatured: false,
-    },
-    {
-      id: "camp5",
-      title: "Student Scholarship Fund",
-      description: "Help provide financial assistance to deserving Muslim students.",
-      imageSrc: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=1000&auto=format&fit=crop",
-      goal: 1000000,
-      raised: 0,
-      startDate: new Date(Date.now() + 1000 * 60 * 60 * 24 * 45),
-      endDate: new Date(Date.now() + 1000 * 60 * 60 * 24 * 120),
-      isActive: false,
-      isFeatured: false,
-    },
-  ],
-  completedCampaigns: [
-    {
-      id: "camp6",
-      title: "Mosque Renovation",
-      description: "We successfully renovated the campus mosque to accommodate more worshippers.",
-      imageSrc: "https://images.unsplash.com/photo-1584551246679-0daf3d275d0f?q=80&w=1000&auto=format&fit=crop",
-      goal: 800000,
-      raised: 850000,
-      startDate: new Date(Date.now() - 1000 * 60 * 60 * 24 * 120),
-      endDate: new Date(Date.now() - 1000 * 60 * 60 * 24 * 30),
-      isActive: false,
-      isFeatured: false,
-    },
-    {
-      id: "camp7",
-      title: "Eid Celebration",
-      description: "We organized a successful Eid celebration for students and community members.",
-      imageSrc: "https://images.unsplash.com/photo-1563861826100-9cb868fdbe1c?q=80&w=1000&auto=format&fit=crop",
-      goal: 250000,
-      raised: 250000,
-      startDate: new Date(Date.now() - 1000 * 60 * 60 * 24 * 90),
-      endDate: new Date(Date.now() - 1000 * 60 * 60 * 24 * 60),
-      isActive: false,
-      isFeatured: false,
-    },
-  ],
+type Campaign = {
+  id: string
+  title: string
+  description: string
+  imageSrc: string
+  goal: number
+  raised: number
+  startDate: string | Date
+  endDate: string | Date
+  isActive: boolean
+  isFeatured: boolean
+}
+
+type CampaignGroup = {
+  activeCampaigns: Campaign[]
+  upcomingCampaigns: Campaign[]
+  completedCampaigns: Campaign[]
 }
 
 export default function Home() {
-  const [campaigns, setCampaigns] = useState(mockCampaigns)
+  const [campaigns, setCampaigns] = useState<CampaignGroup | null>(null)
+
   const [selectedCampaign, setSelectedCampaign] = useState<{
     id: string
     title: string
     description?: string
   } | null>(null)
 
+  const [activeCampaignDetails, setActiveCampaignDetails] = useState<Campaign | null>(null)
+
+  // Fetch campaigns from API
+  useEffect(() => {
+    const fetchCampaigns = async () => {
+      try {
+        const res = await fetch("/api/campaigns")
+        const data = await res.json()
+        setCampaigns(data)
+
+        const featured =
+          data.activeCampaigns.find((c: Campaign) => c.isFeatured) ||
+          data.activeCampaigns[0] ||
+          null
+        setActiveCampaignDetails(featured)
+      } catch (error) {
+        console.error("Failed to fetch campaigns", error)
+      }
+    }
+
+    fetchCampaigns()
+  }, [])
+
   // Get featured campaign for the hero section
   const featuredCampaign =
-    campaigns.activeCampaigns.find((campaign) => campaign.isFeatured) || campaigns.activeCampaigns[0]
-
-  // Find the full campaign details for the selected campaign
-  const [activeCampaignDetails, setActiveCampaignDetails] = useState(featuredCampaign)
+    campaigns?.activeCampaigns.find((campaign) => campaign.isFeatured) ||
+    campaigns?.activeCampaigns[0] ||
+    null
 
   // Handle campaign selection in the donation form
   const handleCampaignSelect = (campaign: { id: string; title: string; description?: string }) => {
     setSelectedCampaign(campaign)
 
     // Find the full campaign details from the active campaigns
-    const fullCampaignDetails = campaigns.activeCampaigns.find((c) => c.id === campaign.id)
+    const fullCampaignDetails = campaigns?.activeCampaigns.find((c) => c.id === campaign.id)
     if (fullCampaignDetails) {
       setActiveCampaignDetails(fullCampaignDetails)
     }
   }
 
-  // Initialize with featured campaign
-  useEffect(() => {
-    setActiveCampaignDetails(featuredCampaign)
-  }, [featuredCampaign])
+  if (!campaigns || !activeCampaignDetails) {
+    return <div className="p-10 text-center text-green-800">Loading campaigns...</div>
+  }
 
   return (
     <div className="min-h-screen bg-white">
@@ -215,8 +162,8 @@ export default function Home() {
             <div className="flex items-center justify-center">
               <div className="relative h-[300px] w-[300px] overflow-hidden rounded-full border-8 border-white shadow-xl transition-all duration-500 hover:scale-105 md:h-[400px] md:w-[400px]">
                 <Image
-                  src="https://images.unsplash.com/photo-1564121211835-e88c852648ab?q=80&w=1000&auto=format&fit=crop"
-                  alt="MSSN LASU Epe Chapter"
+                  src="https://images.unsplash.com/photo-1591604129939-f1efa4d9f7fa?q=80&w=1000&auto=format&fit=crop"
+                  alt="MSSN LASU Epe Chapter - Islamic Education and Community"
                   fill
                   className="object-cover"
                   priority

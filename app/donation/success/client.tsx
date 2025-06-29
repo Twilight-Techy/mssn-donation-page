@@ -23,13 +23,18 @@ export default function DonationSuccessClient() {
       return
     }
 
-    // Mock verification for preview
-    const mockVerifyPayment = async () => {
+    const verifyPayment = async () => {
       try {
         setIsVerifying(true)
 
-        // Simulate API call delay
-        await new Promise((resolve) => setTimeout(resolve, 1000))
+        const res = await fetch(`/api/verify/${paymentMethod}?reference=${reference}`)
+        const data = await res.json()
+
+        if (!res.ok || !data.success) {
+          throw new Error(data.error || "Verification failed")
+        }
+
+        const donation = data.donation
 
         // Update the UI with payment details
         const amountElement = document.getElementById("amount")
@@ -38,19 +43,19 @@ export default function DonationSuccessClient() {
         const dateElement = document.getElementById("date")
 
         if (amountElement) {
-          amountElement.textContent = `₦5,000`
+          amountElement.textContent = `₦${Number(donation.amount).toLocaleString()}`
         }
 
         if (referenceElement) {
-          referenceElement.textContent = reference
+          referenceElement.textContent = donation.reference
         }
 
         if (campaignElement) {
-          campaignElement.textContent = "Magazine Launch"
+          campaignElement.textContent = donation.campaign?.title || "N/A"
         }
 
         if (dateElement) {
-          dateElement.textContent = new Date().toLocaleDateString()
+          dateElement.textContent = new Date(donation.createdAt).toLocaleDateString()
         }
 
         toast({
@@ -69,7 +74,7 @@ export default function DonationSuccessClient() {
       }
     }
 
-    mockVerifyPayment()
+    verifyPayment()
   }, [searchParams, toast])
 
   return null

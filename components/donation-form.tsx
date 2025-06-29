@@ -119,24 +119,35 @@ export default function DonationForm({ campaigns = [], onCampaignSelect }: Donat
 
     setIsLoading(true)
     try {
-      // Simulate API call delay
-      await new Promise((resolve) => setTimeout(resolve, 1500))
-
-      // For preview, just show success and redirect to success page
-      toast({
-        title: "Payment Initialized",
-        description: "Redirecting to payment gateway...",
+      const response = await fetch("/api/donate/paystack", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name,
+          email,
+          phone,
+          amount: isCustomAmount ? customAmount : amount,
+          campaignId: selectedCampaign,
+          isAnonymous,
+          isSubscribed,
+          message,
+        }),
       })
 
-      // Simulate redirect delay
-      setTimeout(() => {
-        window.location.href = "/donation/success?reference=PREVIEW-REF-123&payment_method=paystack"
-      }, 1000)
-    } catch (error) {
-      console.error("Payment error:", error)
+      const data = await response.json()
+
+      if (!response.ok) throw new Error(data.error || "Payment failed")
+
+      toast({
+        title: "Redirecting...",
+        description: "Taking you to Paystack payment page.",
+      })
+
+      window.location.href = data.authorization_url
+    } catch (error: any) {
       toast({
         title: "Payment Error",
-        description: "There was an error processing your payment. Please try again.",
+        description: error.message || "An error occurred during payment.",
         variant: "destructive",
       })
     } finally {

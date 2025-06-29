@@ -20,7 +20,7 @@ export default function DonationSuccessPage() {
 
   useEffect(() => {
     const reference = searchParams.get("reference")
-    const paymentMethod = searchParams.get("payment_method") || "paystack"
+    const paymentMethod = searchParams.get("payment_method") // || "paystack"
 
     if (!reference) {
       toast({
@@ -33,19 +33,24 @@ export default function DonationSuccessPage() {
     }
 
     // Mock verification for preview
-    const mockVerifyPayment = async () => {
+    const verifyPayment = async () => {
       try {
         setIsVerifying(true)
 
-        // Simulate API call delay
-        await new Promise((resolve) => setTimeout(resolve, 1000))
+        const res = await fetch(`/api/verify/${paymentMethod}?reference=${reference}`)
+        const data = await res.json()
 
-        // Update donation details
+        if (!res.ok || !data.success) {
+          throw new Error(data.error || "Payment verification failed")
+        }
+
+        const donation = data.donation
+
         setDonationDetails({
-          reference,
-          amount: "5,000",
-          campaign: "Magazine Launch",
-          date: new Date().toLocaleDateString(),
+          reference: donation.reference,
+          amount: Number(donation.amount).toLocaleString(),
+          campaign: donation.campaign?.title || "N/A",
+          date: new Date(donation.createdAt).toLocaleDateString(),
         })
 
         toast({
@@ -64,7 +69,7 @@ export default function DonationSuccessPage() {
       }
     }
 
-    mockVerifyPayment()
+    verifyPayment()
   }, [searchParams, toast])
 
   return (

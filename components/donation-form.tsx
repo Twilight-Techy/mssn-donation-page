@@ -22,9 +22,10 @@ interface Campaign {
 interface DonationFormProps {
   campaigns?: Campaign[]
   onCampaignSelect?: (campaign: Campaign) => void
+  defaultCampaignId?: string
 }
 
-export default function DonationForm({ campaigns = [], onCampaignSelect }: DonationFormProps) {
+export default function DonationForm({ campaigns = [], onCampaignSelect, defaultCampaignId }: DonationFormProps) {
   const [amount, setAmount] = useState<string>("1000")
   const [customAmount, setCustomAmount] = useState<string>("")
   const [isCustomAmount, setIsCustomAmount] = useState<boolean>(false)
@@ -52,14 +53,17 @@ export default function DonationForm({ campaigns = [], onCampaignSelect }: Donat
   // Set initial selected campaign
   useEffect(() => {
     if (displayCampaigns.length > 0 && !selectedCampaign) {
-      setSelectedCampaign(displayCampaigns[0].id)
+      const defaultCampaign =
+        displayCampaigns.find((c) => c.id === defaultCampaignId) || displayCampaigns[0]
+
+      setSelectedCampaign(defaultCampaign.id)
 
       // Notify parent component about the initially selected campaign
       if (onCampaignSelect) {
-        onCampaignSelect(displayCampaigns[0])
+        onCampaignSelect(defaultCampaign)
       }
     }
-  }, [displayCampaigns, selectedCampaign, onCampaignSelect])
+  }, [displayCampaigns, selectedCampaign, onCampaignSelect, defaultCampaignId])
 
   const handleCampaignChange = (campaignId: string) => {
     setSelectedCampaign(campaignId)

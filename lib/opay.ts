@@ -130,3 +130,39 @@ export async function verifyOpayPayment(reference: string) {
     }
   }
 }
+
+// lib/opay.ts
+import axios from "axios"
+
+const OPAY_BASE_URL = "https://sandboxapi.opaycheckout.com/api/v3"; // change to live in production
+
+export const initOpayPayment = async (data: {
+  amount: number
+  reference: string
+  customerName: string
+  customerEmail: string
+  returnUrl: string
+}) => {
+  const payload = {
+    country: "NG",
+    currency: "NGN",
+    amount: data.amount,
+    reference: data.reference,
+    productDescription: "Donation",
+    customerEmail: data.customerEmail,
+    customerName: data.customerName,
+    returnUrl: data.returnUrl,
+    paymentMethod: "Balance", // or "QrCode", "BankTransfer", "Card" — optional
+    callbackUrl: `${process.env.NEXT_PUBLIC_APP_URL}/api/opay/webhook`
+  }
+
+  const res = await axios.post(`${OPAY_BASE_URL}/merchant-hosted/payment`, payload, {
+    headers: {
+      Authorization: `Bearer ${process.env.OPAY_SECRET_KEY}`,
+      "Content-Type": "application/json"
+    }
+  })
+
+  return res.data
+}
+

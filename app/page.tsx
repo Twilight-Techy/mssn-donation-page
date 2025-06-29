@@ -55,7 +55,15 @@ export default function Home() {
           data.activeCampaigns.find((c: Campaign) => c.isFeatured) ||
           data.activeCampaigns[0] ||
           null
-        setActiveCampaignDetails(featured)
+        
+        if (featured) {
+          setActiveCampaignDetails(featured)
+          setSelectedCampaign({
+            id: featured.id,
+            title: featured.title,
+            description: featured.description,
+          })
+        }
       } catch (error) {
         console.error("Failed to fetch campaigns", error)
       }
@@ -253,6 +261,7 @@ export default function Home() {
                     description: campaign.description,
                   }))}
                   onCampaignSelect={handleCampaignSelect}
+                  defaultCampaignId={activeCampaignDetails.id}
                 />
               </div>
             </div>

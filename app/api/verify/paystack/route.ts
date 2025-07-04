@@ -1,4 +1,4 @@
-// app/api/donate/paystack/verify/route.ts
+// app/api/verify/paystack/route.ts
 
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
@@ -7,6 +7,7 @@ import { addSubscriber } from "@/lib/subscriber"
 
 export async function GET(req: NextRequest) {
   const reference = req.nextUrl.searchParams.get("reference")
+  console.log("Verifying payment with reference:", reference)
 
   if (!reference) {
     return NextResponse.json({ error: "Missing reference" }, { status: 400 })
@@ -41,15 +42,15 @@ export async function GET(req: NextRequest) {
     await addSubscriber(donation.email, donation.name)
   }
 
-  // Send email receipt
-  await sendDonationReceipt({
-    email: donation.email,
-    name: donation.name,
-    amount: donation.amount,
-    reference: donation.reference,
-    campaign: donation.campaign.title, // assuming you fetched the campaign earlier
-    date: donation.createdAt.toISOString(),
-  })
+  // // Send email receipt
+  // await sendDonationReceipt({
+  //   email: donation.email,
+  //   name: donation.name,
+  //   amount: donation.amount,
+  //   reference: donation.reference,
+  //   campaign: donation.campaign.title, // assuming you fetched the campaign earlier
+  //   date: donation.createdAt.toISOString(),
+  // })
 
   return NextResponse.json({ success: true, donation })
 }

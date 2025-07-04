@@ -55,7 +55,7 @@ export async function POST(req: Request) {
             email,
             amount: Number(amount) * 100, // Paystack expects amount in kobo
             reference,
-            callback_url: `${process.env.NEXT_PUBLIC_APP_URL}/donation/success`,
+            callback_url: `${process.env.NEXT_PUBLIC_APP_URL}/donation/success?payment_method=paystack`,
             metadata: {
                 name,
                 campaignId,

@@ -10,7 +10,7 @@ export default function DonationSuccessLayout({
   return (
     <>
       <Suspense fallback={null}>
-        <DonationSuccessClient />
+        {/* <DonationSuccessClient /> */}
       </Suspense>
       {children}
     </>

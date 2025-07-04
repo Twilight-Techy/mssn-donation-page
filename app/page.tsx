@@ -12,6 +12,7 @@ import TestimonialCard from "@/components/testimonial-card"
 import SmoothScroll from "@/components/smooth-scroll"
 import { differenceInDays } from "date-fns"
 import { ChurchIcon as Mosque, Book, GraduationCap, Users, Heart, Calendar, ChevronRight } from "lucide-react"
+import Loader from "@/components/loader"
 
 type Campaign = {
   id: string
@@ -90,7 +91,7 @@ export default function Home() {
   }
 
   if (!campaigns || !activeCampaignDetails) {
-    return <div className="p-10 text-center text-green-800">Loading campaigns...</div>
+    return <Loader />
   }
 
   return (

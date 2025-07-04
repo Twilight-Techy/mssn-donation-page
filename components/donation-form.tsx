@@ -154,6 +154,7 @@ export default function DonationForm({ campaigns = [], onCampaignSelect, default
         description: error.message || "An error occurred during payment.",
         variant: "destructive",
       })
+      window.location.href = "/donation/failed"
     } finally {
       setIsLoading(false)
     }

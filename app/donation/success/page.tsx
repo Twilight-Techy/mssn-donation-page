@@ -11,12 +11,12 @@ export default function DonationSuccessPage() {
   const searchParams = useSearchParams()
   const { toast } = useToast()
   const [isVerifying, setIsVerifying] = useState(true)
-  const [donationDetails, setDonationDetails] = useState({
-    reference: "",
-    amount: "5,000",
-    campaign: "Magazine Launch",
-    date: new Date().toLocaleDateString(),
-  })
+  const [donationDetails, setDonationDetails] = useState<{
+    reference: string
+    amount: string
+    campaign: string
+    date: string
+  } | null>(null)
 
   useEffect(() => {
     const reference = searchParams.get("reference")
@@ -91,22 +91,22 @@ export default function DonationSuccessPage() {
               <p className="flex justify-between">
                 <span className="text-gray-500">Reference:</span>
                 <span className="font-medium text-gray-700">
-                  {isVerifying ? "Processing..." : donationDetails.reference}
+                  {isVerifying ? "Processing..." : donationDetails?.reference || "N/A"}
                 </span>
               </p>
               <p className="flex justify-between">
                 <span className="text-gray-500">Amount:</span>
                 <span className="font-medium text-gray-700">
-                  ₦{isVerifying ? "Processing..." : donationDetails.amount}
+                  ₦{isVerifying ? "Processing..." : donationDetails?.amount || "N/A"}
                 </span>
               </p>
               <p className="flex justify-between">
                 <span className="text-gray-500">Campaign:</span>
-                <span className="font-medium text-gray-700">{donationDetails.campaign}</span>
+                <span className="font-medium text-gray-700">{donationDetails?.campaign || "N/A"}</span>
               </p>
               <p className="flex justify-between">
                 <span className="text-gray-500">Date:</span>
-                <span className="font-medium text-gray-700">{donationDetails.date}</span>
+                <span className="font-medium text-gray-700">{donationDetails?.date || "N/A"}</span>
               </p>
             </div>
           </div>

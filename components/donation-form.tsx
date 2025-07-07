@@ -166,26 +166,40 @@ export default function DonationForm({ campaigns = [], onCampaignSelect, default
 
     setIsLoading(true)
     try {
-      // Simulate API call delay
-      await new Promise((resolve) => setTimeout(resolve, 1500))
-
-      // For preview, just show success and redirect to success page
-      toast({
-        title: "Payment Initialized",
-        description: "Redirecting to Opay...",
+      const response = await fetch("/api/donate/opay", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name,
+          email,
+          phone,
+          amount: isCustomAmount ? customAmount : amount,
+          campaignId: selectedCampaign,
+          isAnonymous,
+          isSubscribed,
+          message,
+        }),
       })
 
-      // Simulate redirect delay
-      setTimeout(() => {
-        window.location.href = "/donation/success?reference=PREVIEW-OPAY-123&payment_method=opay"
-      }, 1000)
-    } catch (error) {
-      console.error("Payment error:", error)
+      const data = await response.json()
+
+      if (!response.ok || !data.authorizationUrl) {
+        throw new Error(data.error || "Opay payment initialization failed")
+      }
+
+      toast({
+        title: "Redirecting...",
+        description: "Taking you to Opay payment page.",
+      })
+
+      window.location.href = data.authorizationUrl
+    } catch (error: any) {
       toast({
         title: "Payment Error",
-        description: "An error occurred while processing your payment. Please try again.",
+        description: error.message || "An error occurred during payment.",
         variant: "destructive",
       })
+      window.location.href = "/donation/failed"
     } finally {
       setIsLoading(false)
     }

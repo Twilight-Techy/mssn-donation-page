@@ -69,6 +69,11 @@ export async function POST(req: Request) {
     const data = await paystackRes.json()
 
     if (!paystackRes.ok) {
+        await prisma.donation.update({
+            where: { reference },
+            data: { status: "failed" },
+        })
+        console.error("Paystack initialization failed:", data)
         return NextResponse.json({ error: data.message || "Failed to initialize payment" }, { status: 500 })
     }
 

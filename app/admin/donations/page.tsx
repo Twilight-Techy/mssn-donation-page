@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { ChevronLeft, ChevronRight } from "lucide-react"
+import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react"
 import { toast } from "sonner"
 
 const ITEMS_PER_PAGE = 10
@@ -38,6 +38,9 @@ export default function DonationsPage() {
     const fetchDonations = async () => {
       try {
         setLoading(true)
+        setCurrentPage(1)
+        window.scrollTo({ top: 0, behavior: "smooth" })
+
         const query = selectedCampaign !== "all" ? `?campaignId=${selectedCampaign}` : ""
         const res = await fetch(`/api/admin/donations${query}`)
         const data = await res.json()
@@ -75,6 +78,14 @@ export default function DonationsPage() {
   const handlePageChange = (page: number) => setCurrentPage(page)
   const handlePrevious = () => setCurrentPage((p) => Math.max(1, p - 1))
   const handleNext = () => setCurrentPage((p) => Math.min(totalPages, p + 1))
+
+  if (loading) {
+    return (
+      <div className="container flex h-[50vh] items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-green-600" />
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-4 md:space-y-6">

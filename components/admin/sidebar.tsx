@@ -43,9 +43,14 @@ export default function AdminSidebar({ isMobile = false }: AdminSidebarProps) {
     },
   ]
 
-  const handleSignOut = () => {
-    localStorage.removeItem("adminAuthenticated")
-    router.push("/admin/login")
+  const handleSignOut = async () => {
+    try {
+      await fetch("/api/admin/logout", { method: "POST" })
+      localStorage.removeItem("adminAuthenticated")
+      router.push("/admin/login")
+    } catch (error) {
+      console.error("Failed to sign out:", error)
+    }
   }
 
   const handleNavClick = () => {

@@ -19,31 +19,46 @@ export default function AdminLoginPage() {
   const router = useRouter()
   const { toast } = useToast()
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
     setLoginError(false)
 
-    // Simple validation
-    if (email === "admin@mssnlasu.org" && password === "admin123") {
-      // Set authentication in localStorage
-      window.localStorage.setItem("adminAuthenticated", "true")
-
-      toast({
-        title: "Login Successful",
-        description: "Welcome to the admin dashboard",
+    try {
+      const res = await fetch("/api/admin/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
       })
 
-      // Use direct window location change instead of router
-      window.location.href = "/admin/dashboard"
-    } else {
-      setIsLoading(false)
-      setLoginError(true)
+      const data = await res.json()
+
+      if (!res.ok) {
+        setLoginError(true)
+        toast({
+          title: "Authentication Error",
+          description: data.error || "Invalid email or password",
+          variant: "destructive",
+        })
+      } else {
+        localStorage.setItem("adminAuthenticated", "true")
+
+        toast({
+          title: "Login Successful",
+          description: "Welcome to the admin dashboard",
+        })
+
+        window.location.href = "/admin/dashboard"
+      }
+    } catch (err) {
+      console.error(err)
       toast({
-        title: "Authentication Error",
-        description: "Invalid email or password",
+        title: "Error",
+        description: "Something went wrong. Please try again.",
         variant: "destructive",
       })
+    } finally {
+      setIsLoading(false)
     }
   }
 

@@ -25,7 +25,6 @@ model Campaign {
   description String
   imageSrc    String
   goal        Float
-  raised      Float       @default(0)
   startDate   DateTime
   endDate     DateTime
   isActive    Boolean     @default(true)

@@ -38,10 +38,9 @@ export default function EditCampaignPage({ params }: { params: { id: string } })
   useEffect(() => {
     const fetchCampaign = async () => {
       try {
-        // For demo purposes, we'll use the mock data from the API route
-        const response = await fetch("/api/campaigns")
-        const campaigns = await response.json()
-        const foundCampaign = campaigns.find((c: Campaign) => c.id === id)
+        const response = await fetch(`/api/campaigns/${id}`)
+        if (!response.ok) throw new Error("Failed to fetch campaign")
+        const foundCampaign = await response.json()
 
         if (foundCampaign) {
           // Convert date strings to Date objects
@@ -216,17 +215,8 @@ export default function EditCampaignPage({ params }: { params: { id: string } })
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="raised">Amount Raised (₦)</Label>
-                <Input
-                  id="raised"
-                  name="raised"
-                  type="number"
-                  value={campaign.raised || ""}
-                  onChange={handleChange}
-                  placeholder="Enter amount raised"
-                  min={0}
-                  required
-                />
+                <Label>Amount Raised</Label>
+                <p className="text-lg font-medium text-green-700">₦{campaign.raised.toLocaleString()}</p>
               </div>
             </div>
 

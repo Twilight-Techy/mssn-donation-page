@@ -17,10 +17,11 @@ import { Trash } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 
 interface DeleteCampaignButtonProps {
-  id: string
+  id: string,
+  onSuccess?: () => void
 }
 
-export default function DeleteCampaignButton({ id }: DeleteCampaignButtonProps) {
+export default function DeleteCampaignButton({ id, onSuccess }: DeleteCampaignButtonProps) {
   const [open, setOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
@@ -42,6 +43,8 @@ export default function DeleteCampaignButton({ id }: DeleteCampaignButtonProps) 
         title: "Campaign deleted",
         description: "The campaign has been deleted successfully",
       })
+
+      onSuccess?.()
 
       router.refresh()
     } catch (error) {

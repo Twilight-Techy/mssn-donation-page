@@ -32,7 +32,7 @@ export default function CampaignsPage() {
   useEffect(() => {
     const fetchCampaigns = async () => {
       try {
-        const response = await fetch("/api/campaigns")
+        const response = await fetch("/api/admin/campaigns")
         const data = await response.json()
         setCampaigns(data)
       } catch (error) {

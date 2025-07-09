@@ -1,62 +1,91 @@
-"use client"
+// /app/api/campaigns/[id]/route.ts
 
-import { type NextRequest, NextResponse } from "next/server"
+import { NextResponse } from "next/server"
+import { prisma } from "@/lib/prisma"
+import { DonationStatus } from "@prisma/client"
 
-// Import the campaigns array from the parent route
-// This is a workaround for the mock data in this demo
-// In a real app, you would use a database
-import { campaigns } from "../route"
-
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+// GET a single campaign by ID
+export async function GET(
+  req: Request,
+  { params }: { params: { id: string } }
+) {
   try {
-    const { id } = params
+    const campaign = await prisma.campaign.findUnique({
+      where: { id: params.id },
+      include: {
+        donations: {
+          where: { status: DonationStatus.completed },
+          select: { amount: true },
+        },
+      },
+    })
 
-    // For preview, just return success
-    console.log("Mock: Deleting campaign", id)
-
-    // Remove from our in-memory campaigns
-    const index = campaigns.findIndex((c) => c.id === id)
-    if (index !== -1) {
-      campaigns.splice(index, 1)
+    if (!campaign) {
+      return NextResponse.json({ error: "Campaign not found" }, { status: 404 })
     }
 
-    return NextResponse.json({ success: true })
+    const raised = campaign.donations.reduce((sum, d) => sum + d.amount, 0)
+
+    return NextResponse.json({
+      ...campaign,
+      raised, // Dynamically calculated
+    })
   } catch (error) {
-    console.error("Error deleting campaign:", error)
-    return NextResponse.json({ error: "Failed to delete campaign" }, { status: 500 })
+    console.error("Error fetching campaign:", error)
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 })
   }
 }
 
-export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
+// PATCH update campaign
+export async function PATCH(
+  req: Request,
+  { params }: { params: { id: string } }
+) {
   try {
-    const { id } = params
-    const data = await request.json()
+    const data = await req.json()
 
-    // If this campaign is being featured, unfeature all other campaigns
+    // If this campaign is being featured, unfeature all others
     if (data.isFeatured) {
-      for (let i = 0; i < campaigns.length; i++) {
-        if (campaigns[i].id !== id) {
-          campaigns[i].isFeatured = false
-        }
-      }
+      await prisma.campaign.updateMany({
+        where: { isFeatured: true, NOT: { id: params.id } },
+        data: { isFeatured: false },
+      })
     }
 
-    // Update the campaign in our in-memory array
-    const index = campaigns.findIndex((c) => c.id === id)
-    if (index !== -1) {
-      campaigns[index] = {
-        ...campaigns[index],
-        ...data,
-        updatedAt: new Date(),
-      }
-    }
+    const updated = await prisma.campaign.update({
+      where: { id: params.id },
+      data: {
+        title: data.title,
+        description: data.description,
+        imageSrc: data.imageSrc,
+        goal: data.goal,
+        startDate: new Date(data.startDate),
+        endDate: new Date(data.endDate),
+        isActive: data.isActive,
+        isFeatured: data.isFeatured,
+      },
+    })
 
-    // For preview, just return the data
-    console.log("Mock: Updating campaign", id, data)
-
-    return NextResponse.json({ ...data, id })
+    return NextResponse.json(updated)
   } catch (error) {
     console.error("Error updating campaign:", error)
-    return NextResponse.json({ error: "Failed to update campaign" }, { status: 500 })
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 })
+  }
+}
+
+// DELETE a campaign
+export async function DELETE(
+  req: Request,
+  { params }: { params: { id: string } }
+) {
+  try {
+    await prisma.campaign.delete({
+      where: { id: params.id },
+    })
+
+    return NextResponse.json({ message: "Campaign deleted successfully" })
+  } catch (error) {
+    console.error("DELETE /campaigns/[id] error:", error)
+    return NextResponse.json({ error: "Failed to delete campaign" }, { status: 500 })
   }
 }

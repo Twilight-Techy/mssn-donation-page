@@ -216,7 +216,7 @@ export default function Home() {
                   />
                   <div className="flex justify-between text-sm">
                     <span className="font-medium text-green-700">
-                      ₦{activeCampaignDetails?.raised.toLocaleString() || "325,000"} raised
+                      ₦{activeCampaignDetails?.raised.toLocaleString()} raised
                     </span>
                     <span className="text-gray-500">
                       {activeCampaignDetails

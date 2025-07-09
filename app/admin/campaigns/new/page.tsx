@@ -60,10 +60,9 @@ export default function NewCampaignPage() {
       // If featuring this campaign, we need to handle the logic to ensure only one campaign is featured
       const payload = {
         ...formData,
-        raised: 0, // New campaigns start with 0 raised
       }
 
-      const response = await fetch("/api/campaigns", {
+      const response = await fetch("/api/admin/campaigns", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

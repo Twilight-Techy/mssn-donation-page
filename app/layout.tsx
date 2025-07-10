@@ -1,6 +1,7 @@
 import type React from "react"
 import { Inter } from "next/font/google"
 import "./globals.css"
+import { Toaster } from "sonner"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -24,7 +25,10 @@ export default function RootLayout({
         <meta name="description" content={metadata.description} />
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
       </head>
-      <body className={inter.className}>{children}</body>
+      <body className={inter.className}>
+        <Toaster />
+        {children}
+      </body>
     </html>
   )
 }

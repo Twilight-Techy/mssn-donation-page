@@ -2,98 +2,93 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { useToast } from "@/hooks/use-toast"
 import { PlusCircle, Trash } from "lucide-react"
+import { toast } from "sonner"
 
-// Mock data for preview
-const initialAdmins = [
-  {
-    id: "admin-1",
-    name: "Admin User",
-    email: "admin@mssnlasu.org",
-    role: "admin",
-  },
-]
+type Admin = { id: string; name: string; email: string };
 
 export default function AdminUsersPage() {
-  const [admins, setAdmins] = useState(initialAdmins)
+  const [admins, setAdmins] = useState<Admin[]>([]);
   const [name, setName] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
-  const { toast } = useToast()
 
-  const handleAddAdmin = (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
+  // Load admins on mount
+  useEffect(() => {
+    async function fetchAdmins() {
+      try {
+        const res = await fetch("/api/admin/users");
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+        setAdmins(data.admins);
+      } catch (err) {
+        toast.error("Something went wrong", {
+          description:
+            err instanceof Error ? err.message : "Please try again later.",
+        })
+      }
+    }
+    fetchAdmins();
+  }, []);
 
-    // Validate inputs
+  const handleAddAdmin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+
     if (!name || !email || !password) {
-      toast({
-        title: "Missing fields",
-        description: "Please fill in all fields",
-        variant: "destructive",
+      toast.error("Missing fields", { description: "Please fill all fields" });
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      const res = await fetch("/api/admin/users", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, password }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+
+      setAdmins(prev => [data.admin, ...prev]);
+      toast("Admin added", { description: `${data.admin.name} was added` });
+      setName(""), setEmail(""), setPassword("");
+    } catch (err) {
+      toast.error("Something went wrong", {
+        description:
+          err instanceof Error ? err.message : "Please try again later.",
       })
-      setIsLoading(false)
-      return
+    } finally {
+      setIsLoading(false);
     }
+  };
 
-    // Check if email already exists
-    if (admins.some((admin) => admin.email === email)) {
-      toast({
-        title: "Email already exists",
-        description: "An admin with this email already exists",
-        variant: "destructive",
-      })
-      setIsLoading(false)
-      return
-    }
-
-    // For preview, just add to the state
-    const newAdmin = {
-      id: `admin-${Date.now()}`,
-      name,
-      email,
-      role: "admin",
-    }
-
-    setAdmins([...admins, newAdmin])
-
-    toast({
-      title: "Admin added",
-      description: `${name} has been added as an admin`,
-    })
-
-    // Reset form
-    setName("")
-    setEmail("")
-    setPassword("")
-    setIsLoading(false)
-  }
-
-  const handleDeleteAdmin = (id: string) => {
-    // Don't allow deleting the last admin
+  const handleDeleteAdmin = async (id: string) => {
+    // prevent deleting last admin
     if (admins.length <= 1) {
-      toast({
-        title: "Cannot delete",
-        description: "You must have at least one admin",
-        variant: "destructive",
-      })
-      return
+      return toast.error("Cannot delete", { description: "At least one admin required" });
     }
 
-    setAdmins(admins.filter((admin) => admin.id !== id))
+    try {
+      const res = await fetch(`/api/admin/users/${id}`, { method: "DELETE" });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
 
-    toast({
-      title: "Admin deleted",
-      description: "The admin has been removed",
-    })
-  }
+      setAdmins(prev => prev.filter(a => a.id !== id));
+      toast("Admin deleted", { description: "Removed successfully" });
+    } catch (err) {
+      toast.error("Something went wrong", {
+        description:
+          err instanceof Error ? err.message : "Please try again later.",
+      })
+    }
+  };
 
   return (
     <div className="space-y-4 md:space-y-6">

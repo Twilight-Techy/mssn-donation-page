@@ -17,6 +17,7 @@ interface CampaignCardProps {
   featured?: boolean
   upcoming?: boolean
   completed?: boolean
+  onDonateClick?: () => void
 }
 
 export default function CampaignCard({
@@ -30,6 +31,7 @@ export default function CampaignCard({
   featured = false,
   upcoming = false,
   completed = false,
+  onDonateClick,
 }: CampaignCardProps) {
   return (
     <div
@@ -87,7 +89,7 @@ export default function CampaignCard({
 
         <div className="mt-4">
           {!completed && !upcoming && (
-            <Button className="w-full bg-green-600 hover:bg-green-700" asChild>
+            <Button onClick={onDonateClick} className="w-full bg-green-600 hover:bg-green-700" asChild>
               <Link href="#donate">Donate Now</Link>
             </Button>
           )}

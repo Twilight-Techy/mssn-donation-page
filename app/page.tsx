@@ -369,6 +369,15 @@ export default function Home() {
                       goal={`₦${campaign.goal.toLocaleString()}`}
                       daysLeft={campaign.endDate ? differenceInDays(new Date(campaign.endDate), new Date()) : 30}
                       featured={campaign.isFeatured}
+                      onDonateClick={() => {
+                        handleCampaignSelect({
+                          id: campaign.id,
+                          title: campaign.title,
+                          description: campaign.description,
+                        })
+
+                        document.getElementById("donate")?.scrollIntoView({ behavior: "smooth" })
+                      }}
                     />
                   ))}
                 </div>

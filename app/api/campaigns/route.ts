@@ -38,11 +38,18 @@ export async function GET() {
       isBefore(new Date(c.endDate), now)
     )
 
-    return NextResponse.json({
-      activeCampaigns,
-      upcomingCampaigns,
-      completedCampaigns,
-    })
+    return NextResponse.json(
+      {
+        activeCampaigns,
+        upcomingCampaigns,
+        completedCampaigns,
+      },
+      {
+        headers: {
+          "Cache-Control": "no-store",
+        },
+      }
+    )
   } catch (error) {
     console.error("Failed to fetch campaigns:", error)
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 })

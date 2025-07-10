@@ -87,6 +87,10 @@ export async function POST(req: Request) {
         const data = await response.json()
 
         if (!response.ok || data.code !== "00000") {
+            await prisma.donation.update({
+                where: { reference },
+                data: { status: "failed" },
+            })
             console.error("Opay initialization failed:", data)
             return NextResponse.json({ error: data.message || "Failed to initialize Opay payment" }, { status: 500 })
         }
@@ -94,6 +98,10 @@ export async function POST(req: Request) {
         return NextResponse.json({ authorizationUrl: data.data.cashierUrl })
     } catch (error) {
         console.error("Opay fetch failed:", error)
+        await prisma.donation.update({
+            where: { reference },
+            data: { status: "failed" },
+        })
         return NextResponse.json({ error: "Opay request failed" }, { status: 500 })
     }
 }

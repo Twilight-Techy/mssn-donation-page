@@ -8,7 +8,8 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useToast } from "@/hooks/use-toast"
-import { ChurchIcon as Mosque, Loader2, AlertCircle } from "lucide-react"
+import { Loader2, AlertCircle } from "lucide-react"
+import { MosqueIcon as Mosque,  } from "@phosphor-icons/react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 
 export default function AdminLoginPage() {

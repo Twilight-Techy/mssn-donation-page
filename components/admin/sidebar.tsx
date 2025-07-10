@@ -4,7 +4,8 @@ import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-import { LayoutDashboard, FileText, DollarSign, LogOut, ChurchIcon as Mosque, UserPlus, Menu } from "lucide-react"
+import { LayoutDashboard, FileText, DollarSign, LogOut, UserPlus, Menu } from "lucide-react"
+import { MosqueIcon as Mosque } from "@phosphor-icons/react"
 import { useState } from "react"
 
 interface AdminSidebarProps {

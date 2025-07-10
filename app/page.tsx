@@ -11,7 +11,8 @@ import CampaignCard from "@/components/campaign-card"
 import TestimonialCard from "@/components/testimonial-card"
 import SmoothScroll from "@/components/smooth-scroll"
 import { differenceInDays } from "date-fns"
-import { ChurchIcon as Mosque, Book, GraduationCap, Users, Heart, Calendar, ChevronRight } from "lucide-react"
+import { Book, GraduationCap, Users, Heart, Calendar, ChevronRight } from "lucide-react"
+import { MosqueIcon as Mosque } from "@phosphor-icons/react";
 import Loader from "@/components/loader"
 
 type Campaign = {

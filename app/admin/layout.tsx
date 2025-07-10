@@ -3,7 +3,7 @@
 import type React from "react"
 import { usePathname } from "next/navigation"
 import AdminSidebar from "@/components/admin/sidebar"
-import { ChurchIcon as Mosque } from "lucide-react"
+import { MosqueIcon as Mosque } from "@phosphor-icons/react"
 
 export default function AdminLayout({
   children,

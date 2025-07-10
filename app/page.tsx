@@ -135,7 +135,7 @@ export default function Home() {
           <div
             className="absolute inset-0 opacity-10"
             style={{
-              backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fillRule='evenodd'%3E%3Cg fill='%23047857' fillOpacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+              backgroundImage: `url("https://images.unsplash.com/photo-1590190924082-30c948798ce3?q=80&w=1092&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D")`,
             }}
           ></div>
           <div className="container relative grid gap-6 py-4 md:grid-cols-2 md:gap-10 md:py-8">
@@ -171,7 +171,7 @@ export default function Home() {
             <div className="flex items-center justify-center">
               <div className="relative h-[300px] w-[300px] overflow-hidden rounded-full border-8 border-white shadow-xl transition-all duration-500 hover:scale-105 md:h-[400px] md:w-[400px]">
                 <Image
-                  src="https://images.unsplash.com/photo-1591604129939-f1efa4d9f7fa?q=80&w=1000&auto=format&fit=crop"
+                  src="https://images.unsplash.com/photo-1590075865003-e48277faa558?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
                   alt="MSSN LASU Epe Chapter - Islamic Education and Community"
                   fill
                   className="object-cover"

@@ -11,6 +11,7 @@ interface Donation {
   id: string
   amount: number
   createdAt: string
+  status: string
   campaign: {
     id: string
     title: string
@@ -53,7 +54,11 @@ export default function DashboardChart({
       try {
         const res = await fetch(`/api/admin/donations?campaignId=${campaignId ?? "all"}`)
         const data = await res.json()
-        setDonations(data.donations)
+
+        // ✅ Filter to only 'completed' donations
+        const completed = data.donations.filter((d: Donation) => d.status === "completed")
+
+        setDonations(completed)
       } catch (err) {
         console.error("Failed to fetch donations for chart:", err)
       }

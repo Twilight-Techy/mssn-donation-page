@@ -9,7 +9,9 @@ export async function GET(req: NextRequest) {
             const campaign = await prisma.campaign.findUnique({
                 where: { id: campaignId },
                 include: {
-                    donations: true,
+                    donations: {
+                        where: { status: "completed" }, // ✅ Only completed donations
+                    },
                 },
             })
 
@@ -29,28 +31,36 @@ export async function GET(req: NextRequest) {
                     donationsCount: campaign.donations.length,
                     progress: Math.round((raised / campaign.goal) * 100),
                 },
-                donations: campaign.donations.slice(-5).map(d => ({
-                    id: d.id,
-                    name: d.isAnonymous ? "Anonymous" : d.name,
-                    email: d.email,
-                    amount: d.amount,
-                    createdAt: d.createdAt,
-                    isAnonymous: d.isAnonymous,
-                    campaign: {
-                        id: campaign.id,
-                        title: campaign.title,
-                    },
-                })),
+                donations: campaign.donations
+                    .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+                    .slice(0, 5)
+                    .map(d => ({
+                        id: d.id,
+                        name: d.isAnonymous ? "Anonymous" : d.name,
+                        email: d.email,
+                        amount: d.amount,
+                        createdAt: d.createdAt,
+                        isAnonymous: d.isAnonymous,
+                        campaign: {
+                            id: campaign.id,
+                            title: campaign.title,
+                        },
+                    })),
             })
         } else {
             const [campaigns, donations] = await Promise.all([
                 prisma.campaign.findMany(),
-                prisma.donation.findMany({ include: { campaign: true } }),
+                prisma.donation.findMany({
+                    where: { status: "completed" }, // ✅ Only completed donations
+                    include: { campaign: true },
+                }),
             ])
 
             const activeCampaigns = campaigns.filter(c => c.isActive)
             const activeCampaignIds = activeCampaigns.map(c => c.id)
-            const activeCampaignsDonations = donations.filter(d => activeCampaignIds.includes(d.campaignId))
+            const activeCampaignsDonations = donations.filter(d =>
+                activeCampaignIds.includes(d.campaignId)
+            )
 
             return NextResponse.json({
                 stats: {

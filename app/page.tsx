@@ -49,7 +49,7 @@ export default function Home() {
   useEffect(() => {
     const fetchCampaigns = async () => {
       try {
-        const res = await fetch("/api/campaigns")
+        const res = await fetch("/api/campaigns", { cache: "no-store" })
         const data = await res.json()
         setCampaigns(data)
 

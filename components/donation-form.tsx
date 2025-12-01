@@ -44,7 +44,11 @@ export default function DonationForm({ campaigns = [], onCampaignSelect, default
   const displayCampaigns =
     campaigns.length > 0
       ? campaigns
-      : []
+      : [
+        { id: "camp1", title: "Magazine Launch", description: "Help us launch our first Islamic magazine" },
+        { id: "camp2", title: "Ramadan Food Drive", description: "Provide iftar meals for students" },
+        { id: "camp3", title: "Islamic Library", description: "Help us expand our collection of Islamic books" },
+      ]
 
   // Set initial selected campaign
   useEffect(() => {

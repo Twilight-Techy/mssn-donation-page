@@ -36,6 +36,7 @@ type CampaignGroup = {
 
 export default function Home() {
   const [campaigns, setCampaigns] = useState<CampaignGroup | null>(null)
+  const [isLoading, setIsLoading] = useState<boolean>(true)
 
   const [selectedCampaign, setSelectedCampaign] = useState<{
     id: string
@@ -48,16 +49,25 @@ export default function Home() {
   // Fetch campaigns from API
   useEffect(() => {
     const fetchCampaigns = async () => {
+      setIsLoading(true)
       try {
         const res = await fetch("/api/campaigns", { cache: "no-store" })
         const data = await res.json()
-        setCampaigns(data)
+
+        const emptyGroup: CampaignGroup = {
+          activeCampaigns: [],
+          upcomingCampaigns: [],
+          completedCampaigns: [],
+        }
+
+        const payload: CampaignGroup = data ?? emptyGroup
+        setCampaigns(payload)
 
         const featured =
-          data.activeCampaigns.find((c: Campaign) => c.isFeatured) ||
-          data.activeCampaigns[0] ||
+          (payload.activeCampaigns && payload.activeCampaigns.find((c: Campaign) => c.isFeatured)) ||
+          (payload.activeCampaigns && payload.activeCampaigns[0]) ||
           null
-        
+
         if (featured) {
           setActiveCampaignDetails(featured)
           setSelectedCampaign({
@@ -65,9 +75,20 @@ export default function Home() {
             title: featured.title,
             description: featured.description,
           })
+        } else {
+          setActiveCampaignDetails(null)
         }
       } catch (error) {
         console.error("Failed to fetch campaigns", error)
+        // ensure the page still renders even on error
+        setCampaigns({
+          activeCampaigns: [],
+          upcomingCampaigns: [],
+          completedCampaigns: [],
+        })
+        setActiveCampaignDetails(null)
+      } finally {
+        setIsLoading(false)
       }
     }
 
@@ -76,8 +97,8 @@ export default function Home() {
 
   // Get featured campaign for the hero section
   const featuredCampaign =
-    campaigns?.activeCampaigns.find((campaign) => campaign.isFeatured) ||
-    campaigns?.activeCampaigns[0] ||
+    campaigns?.activeCampaigns?.find((campaign) => campaign.isFeatured) ||
+    campaigns?.activeCampaigns?.[0] ||
     null
 
   // Handle campaign selection in the donation form
@@ -85,15 +106,23 @@ export default function Home() {
     setSelectedCampaign(campaign)
 
     // Find the full campaign details from the active campaigns
-    const fullCampaignDetails = campaigns?.activeCampaigns.find((c) => c.id === campaign.id)
+    const fullCampaignDetails = campaigns?.activeCampaigns?.find((c) => c.id === campaign.id) || null
     if (fullCampaignDetails) {
       setActiveCampaignDetails(fullCampaignDetails)
+    } else {
+      setActiveCampaignDetails(null)
     }
   }
 
-  if (!campaigns || !activeCampaignDetails) {
+  // Show loader only while fetching
+  if (isLoading) {
     return <Loader />
   }
+
+  // safe fallbacks for rendering when arrays are empty / details missing
+  const activeList = campaigns?.activeCampaigns ?? []
+  const upcomingList = campaigns?.upcomingCampaigns ?? []
+  const completedList = campaigns?.completedCampaigns ?? []
 
   return (
     <div className="min-h-screen bg-white">
@@ -203,12 +232,12 @@ export default function Home() {
                   <div className="flex items-center justify-between">
                     <h3 className="text-xl font-bold text-green-700">Fundraising Goal</h3>
                     <span className="font-bold text-green-600">
-                      ₦{activeCampaignDetails?.goal.toLocaleString() || "500,000"}
+                      ₦{activeCampaignDetails?.goal ? activeCampaignDetails.goal.toLocaleString() : "500,000"}
                     </span>
                   </div>
                   <Progress
                     value={
-                      activeCampaignDetails
+                      activeCampaignDetails && activeCampaignDetails.goal
                         ? Math.round((activeCampaignDetails.raised / activeCampaignDetails.goal) * 100)
                         : 65
                     }
@@ -217,10 +246,10 @@ export default function Home() {
                   />
                   <div className="flex justify-between text-sm">
                     <span className="font-medium text-green-700">
-                      ₦{activeCampaignDetails?.raised.toLocaleString()} raised
+                      ₦{activeCampaignDetails?.raised ? activeCampaignDetails.raised.toLocaleString() : "0"} raised
                     </span>
                     <span className="text-gray-500">
-                      {activeCampaignDetails
+                      {activeCampaignDetails && activeCampaignDetails.goal
                         ? Math.round((activeCampaignDetails.raised / activeCampaignDetails.goal) * 100)
                         : 65}
                       % of goal
@@ -257,13 +286,13 @@ export default function Home() {
               <div className="rounded-xl bg-green-50 p-6 shadow-lg">
                 <h3 className="mb-4 text-xl font-bold text-green-800">Make a Donation</h3>
                 <DonationForm
-                  campaigns={campaigns.activeCampaigns.map((campaign) => ({
+                  campaigns={activeList.map((campaign) => ({
                     id: campaign.id,
                     title: campaign.title,
                     description: campaign.description,
                   }))}
                   onCampaignSelect={handleCampaignSelect}
-                  defaultCampaignId={activeCampaignDetails.id}
+                  defaultCampaignId={activeCampaignDetails?.id}
                 />
               </div>
             </div>
@@ -358,7 +387,7 @@ export default function Home() {
               </TabsList>
               <TabsContent value="current" className="mt-6">
                 <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                  {campaigns.activeCampaigns.map((campaign) => (
+                  {activeList.map((campaign) => (
                     <CampaignCard
                       key={campaign.id}
                       title={campaign.title}
@@ -384,7 +413,7 @@ export default function Home() {
               </TabsContent>
               <TabsContent value="upcoming" className="mt-6">
                 <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                  {campaigns.upcomingCampaigns.map((campaign) => (
+                  {upcomingList.map((campaign) => (
                     <CampaignCard
                       key={campaign.id}
                       title={campaign.title}
@@ -401,7 +430,7 @@ export default function Home() {
               </TabsContent>
               <TabsContent value="past" className="mt-6">
                 <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                  {campaigns.completedCampaigns.map((campaign) => (
+                  {completedList.map((campaign) => (
                     <CampaignCard
                       key={campaign.id}
                       title={campaign.title}
